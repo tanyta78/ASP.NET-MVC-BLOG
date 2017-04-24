@@ -22,5 +22,7 @@ namespace MyBlogDefence.Models
         public int CategoryId { get; set; }
 
         public ICollection<Category>Categories { get; set; }
+
+        public string Tags { get; set; }
     }
 }

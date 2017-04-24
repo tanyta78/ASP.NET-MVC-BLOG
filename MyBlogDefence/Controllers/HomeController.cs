@@ -43,6 +43,7 @@ namespace MyBlogDefence.Controllers
                 var articles = database.Articles
                     .Where(a => a.CategoryId == categoryId)
                     .Include(a => a.Author)
+                    .Include(a => a.Tags)
                     .ToList();
 
                 return View(articles);

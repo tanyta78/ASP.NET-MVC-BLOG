@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,9 +7,11 @@ namespace MyBlogDefence.Models
 {
     public class Article
     {
+        private ICollection<Tag> tags;
+
         public Article()
         {
-
+            this.tags = new HashSet<Tag>();
         }
 
         public Article(string authorId,string title,string content,int categoryId)
@@ -17,6 +20,7 @@ namespace MyBlogDefence.Models
             this.Title = title;
             this.Content = content;
             this.CategoryId = categoryId;
+            this.tags = new HashSet<Tag>();
         }
 
 
@@ -44,6 +48,12 @@ namespace MyBlogDefence.Models
         public int CategoryId { get; set; }
 
         public virtual Category Category { get; set; }
+
+        public virtual ICollection<Tag> Tags
+        {
+            get { return this.tags; }
+            set { this.tags = value; }
+        }
 
     }
 }
