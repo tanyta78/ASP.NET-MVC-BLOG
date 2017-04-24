@@ -61,14 +61,22 @@ namespace MyBlogDefence.Controllers
         [Authorize]
         public ActionResult Create()
         {
-            return View();
+            using (var database = new BlogDbContext())
+            {
+                var model = new ArticleViewModel();
+                model.Categories = database.Categories
+                    .OrderBy(c => c.Name)
+                    .ToList();
+                return View(model);
+            }
+           
         }
 
         //
         // POST: Article/Create
         [HttpPost]
         [Authorize]
-        public ActionResult Create(Article article)
+        public ActionResult Create(ArticleViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -79,7 +87,7 @@ namespace MyBlogDefence.Controllers
                         .First()
                         .Id;
 
-                    article.AuthorId = authorId;
+                    var article = new Article(authorId, model.Title, model.Content, model.CategoryId);
 
                     database.Articles.Add(article);
                     database.SaveChanges();
@@ -88,7 +96,7 @@ namespace MyBlogDefence.Controllers
                 }
             }
 
-            return View(article);
+            return View(model);
         }
 
         //
@@ -102,12 +110,13 @@ namespace MyBlogDefence.Controllers
 
             using (var database = new BlogDbContext())
             {
+
                 var article = database.Articles
                     .Where(a => a.Id == id)
                     .Include(a => a.Author)
                     .First();
 
-                if(!IsUserAuthorizedToEdit(article))
+                if (!IsUserAuthorizedToEdit(article))
                 {
                     return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
                 }
@@ -117,7 +126,16 @@ namespace MyBlogDefence.Controllers
                     return HttpNotFound();
                 }
 
-                return View(article);
+                var model = new ArticleViewModel();
+                model.Id = article.Id;
+                model.Title = article.Title;
+                model.Content = article.Content;
+                model.CategoryId = article.CategoryId; ;
+                model.Categories = database.Categories
+                    .OrderBy(c => c.Name)
+                    .ToList();
+                return View(model);
+             
             }
 
 
@@ -185,7 +203,10 @@ namespace MyBlogDefence.Controllers
                 model.Id = article.Id;
                 model.Title = article.Title;
                 model.Content = article.Content;
-
+                model.CategoryId = article.CategoryId; ;
+                model.Categories = database.Categories
+                    .OrderBy(c => c.Name)
+                    .ToList();
                 return View(model);
             }
         }
@@ -204,6 +225,7 @@ namespace MyBlogDefence.Controllers
 
                     article.Title = model.Title;
                     article.Content = model.Content;
+                    article.CategoryId = model.CategoryId;
 
                     database.Entry(article).State = EntityState.Modified;
                     database.SaveChanges();
